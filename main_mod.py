@@ -1,21 +1,22 @@
 # main_mod.py
 
 # Importing the necessary libraries
-from langchain.prompts import PromptTemplate
-from langchain.chains import LLMChain
 from langchain_groq import ChatGroq
-from langchain.document_loaders import PyMuPDFLoader
+from langchain_core.prompts import PromptTemplate
+from langchain.chains import LLMChain
+from langchain_community.document_loaders import PyMuPDFLoader
 import os
 from dotenv import load_dotenv
 import json, re, ast
 import tempfile
+import streamlit as st
 
 # Load environment variables
 load_dotenv()
-groq_api_key = os.getenv("groq_api_key")
+groq_api_key = st.secrets.get("GROQ_API_KEY", os.getenv("GROQ_API_KEY"))
 
 # Initialize Groq LLM
-llm = ChatGroq(temperature=0, model_name="llama3-8b-8192", api_key=groq_api_key)
+llm = ChatGroq(temperature=0, model_name="llama-3.1-8b-instant", api_key=groq_api_key)
 
 # Prompt template for resume and job description analysis
 template = """
@@ -54,7 +55,9 @@ prompt = PromptTemplate(
 )
 
 # Create LLM chain with the prompt
-chain = LLMChain(llm=llm, prompt=prompt)
+chain = prompt | llm
+response = chain.invoke({"resume_text": resume_text, "jd_text": jd_text})
+response_text = response.content  # AIMessage object → .content
 
 # Extract text content from PDF resume
 def extract_resume_text(uploaded_file): # Renamed from pdf_path → uploaded_file
