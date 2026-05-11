@@ -1,5 +1,7 @@
 streamlit
-langchain.community
+langchain
+langchain-community
+langchain-core
 langchain-groq
-dotenv
+python-dotenv
 PyMuPDF
